@@ -26,6 +26,13 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 
+  posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "post",
+    },
+  ],
+
   followers: [
     {
       type: mongoose.Schema.Types.ObjectId,

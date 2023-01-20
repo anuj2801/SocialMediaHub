@@ -18,9 +18,18 @@ exports.register = async (req, resp) => {
       avatar: { public_id: "sample id", url: "sample" },
     });
 
-    resp.status(201).json({
+    const token = await user.generateToken();
+
+    const options = {
+      expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    };
+
+    resp.status(201).cookie("token", token, options).json({
       success: true,
+      message: "user registered successfully",
       user,
+      token,
     });
   } catch (error) {
     return resp.status(500).json({
@@ -53,12 +62,13 @@ exports.login = async (req, resp) => {
 
     const options = {
       expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      httponly: true,
+      httpOnly: true,
     };
 
     resp.status(200).cookie("token", token, options).json({
       success: true,
       user,
+      token,
     });
   } catch (error) {
     resp.status(500).json({
