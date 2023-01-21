@@ -18,7 +18,7 @@ const user=require("./routes/user");
 //using routes
 //(localhost:4000/api/v1/posts/upload)
 app.use("/api/v1", post);
-//(localhost:4000/api/v1)//for registration and login
+//(localhost:4000/api/v1)//for user methods
 app.use("/api/v1", user);
 
 module.exports = app;
