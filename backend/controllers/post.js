@@ -1,4 +1,4 @@
-const post = require("../models/post");
+const Post = require("../models/post");
 const User = require("../models/user");
 
 exports.createPost = async (req, resp) => {
@@ -13,7 +13,7 @@ exports.createPost = async (req, resp) => {
     };
 
     console.log(newPostData);
-    const newpost = await post.create(newPostData);
+    const newpost = await Post.create(newPostData);
 
     const user = await User.findById(req.user._id);
     user.posts.push(newpost._id);
@@ -33,7 +33,7 @@ exports.createPost = async (req, resp) => {
 
 exports.deletePost = async (req, resp) => {
   try {
-    const detectpost = await post.findById(req.params.id);
+    const detectpost = await Post.findById(req.params.id);
     if (!detectpost) {
       resp.status(404).json({
         success: false,
@@ -48,7 +48,7 @@ exports.deletePost = async (req, resp) => {
       });
     }
 
-    await post.remove();
+    await Post.remove();
 
     const user = await User.findById(req.user._id);
     const index = user.posts.indexOf(req.params.id);
@@ -70,7 +70,7 @@ exports.deletePost = async (req, resp) => {
 
 exports.likeAndUnlikePost = async (req, resp) => {
   try {
-    const detectpost = await post.findById(req.params.id);
+    const detectpost = await Post.findById(req.params.id);
 
     if (!detectpost) {
       resp.status(404).json({
@@ -109,7 +109,7 @@ exports.getPostofFollowing = async (req, resp) => {
   try {
     const user = await User.findById(req.user._id);
 
-    const posts = await post.find({
+    const posts = await Post.find({
       owner: {
         $in: user.following,
       },
@@ -119,6 +119,40 @@ exports.getPostofFollowing = async (req, resp) => {
       success: true,
       posts,
     });
+  } catch (error) {
+    resp.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.updateCaption = async (req, resp) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      resp.status(404).json({
+        success: false,
+        message: "Post Not Found",
+      });
+    } else {
+      if (post.owner.toString() !== req.user._id.toString()) {
+        resp.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+
+        post.caption = req.body.caption;
+
+        await post.save();
+
+        resp.status(200).json({
+          success: true,
+          message: "Caption Updated",
+        });
+      }
+    }
   } catch (error) {
     resp.status(500).json({
       success: false,
