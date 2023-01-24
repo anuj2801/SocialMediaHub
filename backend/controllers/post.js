@@ -160,3 +160,44 @@ exports.updateCaption = async (req, resp) => {
     });
   }
 };
+
+exports.commentOnPost = async (req, resp) => {
+  try {
+    const post = Post.findById(req.params.id);
+
+    if (!post) {
+      return resp.status(404).json({
+        success: false,
+        message: "Post Not found",
+      });
+    }
+
+    let commentIndex = -1;
+    post.comments.forEach((item, index) => {
+      if (item.user.toString() == req.user._id.toString()) {
+        commentIndex = index;
+      }
+    });
+
+    if (commentIndex !== -1) {
+      post.comments[commentIndex].comment = req.body.comment;
+      await post.save();
+      resp.status(200).json({
+        success: true,
+        message: "Comment updated",
+      });
+    } else {
+      post.comments.push({ user: req.user._id, comment: req.body.comment });
+      await post.save();
+      resp.status(200).json({
+        success: true,
+        message: "Comment added",
+      });
+    }
+  } catch (error) {
+    resp.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
