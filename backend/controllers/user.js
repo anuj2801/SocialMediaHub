@@ -311,3 +311,23 @@ exports.getAllUsers = async (req, resp) => {
     });
   }
 };
+
+exports.forgotPassword = async (req, resp) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return resp.status(404).json({
+        success: false,
+        message: "User Not Found",
+      });
+    } else {
+         
+    }
+  } catch (error) {
+    resp.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
